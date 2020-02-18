@@ -43,6 +43,7 @@ function createCharge(){
     }
   }).then(function(data){
     console.log("charge created successfully") 
+    alert("payment completed successfully");
     console.log(data);
   }).fail(function(e){
     console.log(e)
