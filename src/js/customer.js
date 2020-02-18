@@ -29,6 +29,15 @@ function createCharge(){
     url: "/charge",
     method: 'POST',
     data: {
+      "shipping_address": {
+        "country": $('#country-ip').val(),
+        "state": $('#state-ip').val(),
+        "city": $('#city-ip').val(),
+        "line1": $('#address-one-ip').val(),
+        "line2": $('#address-two-ip').val(),
+        "zip_code": $('#postal-two-ip').val(),
+        "email": $('#email-ip').val()
+      },
       payment_id: localStorage.getItem("last_payment_id"),
       payment_method: localStorage.getItem("pay_now_token")
     }

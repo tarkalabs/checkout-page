@@ -11,7 +11,7 @@ const opts = {
     'app-id': 'com.devtechnica.tc-test',
     'private-key': 'd1898114-dbc1-4f6a-b72b-d2c73043ae18',
     'x-payments-os-env': 'test',
-    'api-version': '1.2.0'
+    'api-version': '1.3.0'
   }
 }
 
@@ -21,7 +21,7 @@ const headers = {
   'app-id': 'com.devtechnica.tc-test',
   'private-key': 'd1898114-dbc1-4f6a-b72b-d2c73043ae18',
   'x-payments-os-env': 'test',
-  'api-version': '1.2.0',
+  'api-version': '1.3.0',
 };
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -40,16 +40,16 @@ app.get('/supportedpaymentmethods', (req, res) => {
 });
 app.use(bodyparser.urlencoded({ extended: false }));
 app.post('/create_customer_data', (req, res) => {
-  request_payload = {
+  var request_payload = {
     customer_reference: req.body.customer_reference,
     first_name: req.body.first_name,
     last_name: req.body.last_name,
     email: req.body.email,
-    payment_methods: [{
-      type: "tokenized",
-      token: req.body["payment_methods[]"],
-      credit_card_cvv: "123"
-    }],
+    //payment_methods: [{
+    //  type: "tokenized",
+    //  token: req.body["payment_methods[]"],
+    //  credit_card_cvv: "123"
+    //}],
     shipping_address: {
       country: req.body["shipping_address[country]"],
       state: req.body["shipping_address[state]"],
@@ -61,6 +61,7 @@ app.post('/create_customer_data', (req, res) => {
   }
   axios.post('https://api.paymentsos.com/customers', request_payload, opts).then(function(data){
     console.log(data);
+    axios.post('https://api.paymentsos.com/customers/'+data.customer_id+'/payment-methods/'+req.body['payment_methods[]']);
     res.send({message: "request processed successfully", data: CircularJSON.stringify(data)})
   }).catch((e) => {
     debugger;
@@ -94,15 +95,47 @@ app.get('/customers/:customer_id/payment-methods/:token', (req, res) => {
 })
 
 app.post("/charge", (req, res) => {
-  var payload = {
-    payment_method: {
+  var payload ={
+    "merchant_site_url": "https://tunecore.in",
+    "reconciliation_id": "testtransaction"+Math.round(Math.random()*1000),
+    "provider_specific_data": {
+      "payu_india": {
+        "additional_details": {
+          "recurring": "1"
+        }
+      }
+    },
+    "payment_method": {
       "type": "tokenized",
       "token": req.body.payment_method,
       "credit_card_cvv": "123"
+    },
+    "billing_address": {
+      country: req.body["shipping_address[country]"],
+      state: req.body["shipping_address[state]"],
+      city: req.body["shipping_address[city]"],
+      line1: req.body["shipping_address[line1]"],
+      line2: req.body["shipping_address[line2]"],
+      email: req.body.email
     }
-  }
+  } 
+  // var payload = {
+  //   payment_method: {
+  //     "type": "tokenized",
+  //     "token": ,
+  //     "credit_card_cvv": "123"
+  //   },
+  //   "billing_address": {
+  //     country: req.body["shipping_address[country]"],
+  //     state: req.body["shipping_address[state]"],
+  //     city: req.body["shipping_address[city]"],
+  //     line1: req.body["shipping_address[line1]"],
+  //     line2: req.body["shipping_address[line2]"],
+  //     email: req.body.email
+  //   }
+  // }
   axios.post("https://api.paymentsos.com/payments/"+req.body.payment_id+"/charges", payload, opts).then(function(data){
-    res.send({charge: data});
+    res.send({charge: CircularJSON.stringify(data)});
   }).catch((e)=> {
     console.log("error while creating charge: "+e);
     debugger;
@@ -114,8 +147,16 @@ app.post('/payments', (req, res) => {
   var payload = {
     amount: parseInt(req.body.amount),
     currency: req.body.currency,
-    customer_id: req.body.customer_id
-  }
+    customer_id: req.body.customer_id,
+    "billing_address": {
+        country: req.body["shipping_address[country]"],
+        state: req.body["shipping_address[state]"],
+        city: req.body["shipping_address[city]"],
+        line1: req.body["shipping_address[line1]"],
+        line2: req.body["shipping_address[line2]"],
+        email: req.body.email
+      }
+    }
   axios.post("https://api.paymentsos.com/payments", payload, opts).then(function(data){
     console.log(data);
     res.send({ message: "Payment created Successfully", data: CircularJSON.stringify(data)});
