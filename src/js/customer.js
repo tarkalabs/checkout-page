@@ -114,3 +114,44 @@ $(document).ready(function(){
   });
   $('#saved-payments').on('click', retrieveCustomer);
 });
+
+$("#pay-paytm").on('click', function(){
+  var amount = $('#paytm-pay-amount').val();
+  if(!amount) {
+    alert("please enter an amount");
+    console.log(amount);
+    return false;
+  } else {
+    var paytm_payment_data = {
+      // customer_id: localStorage.getItem("customer_id"),
+      //return_url: window.location.href,
+      "payment": JSON.stringify({"amount": amount,
+        "currency": "INR",
+        "billing_address": {
+          "phone": $('#paytm-phone').val()
+        },
+        "order": {
+          "id": String(Math.round(Math.random()*99999))
+        }
+      }),
+      "charge": JSON.stringify({
+        "merchant_site_url": window.location.href,
+        "payment_method": {
+          "source_type": "ewallet",
+          "type": "untokenized",
+          "vendor": "Paytm"
+        },
+        "reconciliation_id": String(Math.round(Math.random()*99999))
+      })
+    }
+    $.ajax({
+      url: "/paytm",
+      method: 'POST',
+      data: paytm_payment_data
+    }).then(function(resp){
+      var data = JSON.parse(resp.data);
+      var paytm_redirect_url = data.redirection.url;
+      window.location.href = paytm_redirect_url;
+    });
+  }
+});

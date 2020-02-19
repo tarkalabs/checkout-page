@@ -119,21 +119,6 @@ app.post("/charge", (req, res) => {
       email: req.body.email
     }
   } 
-  // var payload = {
-  //   payment_method: {
-  //     "type": "tokenized",
-  //     "token": ,
-  //     "credit_card_cvv": "123"
-  //   },
-  //   "billing_address": {
-  //     country: req.body["shipping_address[country]"],
-  //     state: req.body["shipping_address[state]"],
-  //     city: req.body["shipping_address[city]"],
-  //     line1: req.body["shipping_address[line1]"],
-  //     line2: req.body["shipping_address[line2]"],
-  //     email: req.body.email
-  //   }
-  // }
   axios.post("https://api.paymentsos.com/payments/"+req.body.payment_id+"/charges", payload, opts).then(function(data){
     res.send({charge: CircularJSON.stringify(data)});
   }).catch((e)=> {
@@ -142,6 +127,31 @@ app.post("/charge", (req, res) => {
     res.send({ charge: e, message: "failed"});
   });
 })
+
+app.post('/paytm', (req, res) => {
+  // create a payment 
+  var payload = JSON.parse(req.body.payment);
+  let charge_payload = JSON.parse(req.body.charge);
+  payload['amount'] = parseInt(payload.amount);
+  console.log("creating payment..")
+  axios.post("https://api.paymentsos.com/payments", payload, opts).then(function(pay_response){
+    console.log(pay_response.data);
+    console.log("payment created successfully..")
+    console.log("creating charge..")
+    axios.post("https://api.paymentsos.com/payments/"+pay_response.data.id+"/charges", charge_payload, opts).then(function(charge_data){
+      console.log(charge_data);
+      console.log("charge created successfully");
+      res.send({data: CircularJSON.stringify(charge_data.data)});
+    }).catch(function(err){
+      debugger;
+      res.send({message: "charge creation failed"})
+    });
+  }).catch(function(e){
+    debugger;
+    res.send({ message: "payment creation failed" });
+    console.log("paytm: create-payment-error: "+e);
+  });
+});
 
 app.post('/payments', (req, res) => {
   var payload = {

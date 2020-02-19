@@ -99,16 +99,24 @@
             </form>
           </div>
           <div id="otherpm" class="tab-pane fade">
-            <p id="pmintro">If the provider you are transacting against supports the <a href="https://developers.paymentsos.com/docs/api/#operation/retrieve-supported-payment-methods" target="_blank">Get Supported Payment Methods API</a>, then the available payment methods will appear in the list below.</p>
-            <select class="selectpms"></select>
-            <button id="paybtnapms" type="submit">Pay</button>
+            <h3>Pay with PayTM</h3>
+            <div style="width: 400px; margin: 10px 0px;">
+              amount:
+              <input type="number" step="0.50" id="paytm-pay-amount" class="field" style="width: 100%;" placeholder="Amount in INR" required/>
+            </div>
+            <div style="width: 400px; margin: 10px 0px;">
+              mobile: 
+              <input type="tel" id="paytm-phone" class="field" style="width: 100%;" placeholder="Phone Number" required/>
+            </div>
+            <button id="pay-paytm">Pay</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <script src="https://js.paymentsos.com/v2/latest/secure-fields.min.js"></script>
     <script type='text/javascript' src="securefields.js"></script>
-    <script type='text/javascript' src="paymentmethods.js"></script>          
+    <!--<script type='text/javascript' src="paymentmethods.js"></script>-->
     <script type='text/javascript' src="customer.js"></script>          
   </body>
 </html>
